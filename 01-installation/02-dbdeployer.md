@@ -397,3 +397,17 @@ drwxr-x--- 2 kris kris    6 Jul  3 15:57  test
 -rw-r----- 1 kris kris  16M Jul  3 15:59  undo_001
 -rw-r----- 1 kris kris  16M Jul  3 15:59  undo_002
 ```
+
+## Und Ende
+
+```bash
+$ cd ~/sandboxes
+$ for i in msb*; do (cd $i; ./stop); done
+stop /home/kris/sandboxes/msb_4_1_22
+stop /home/kris/sandboxes/msb_5_0_96
+stop /home/kris/sandboxes/msb_5_1_72
+stop /home/kris/sandboxes/msb_5_5_62
+stop /home/kris/sandboxes/msb_5_6_44
+stop /home/kris/sandboxes/msb_5_7_34
+stop /home/kris/sandboxes/msb_8_0_25
+```
