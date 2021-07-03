@@ -48,21 +48,25 @@ Vergleiche das mit AWS RDS db.m5.4xl (1/2 solche Blade), plus EBS, Netz und S3, 
 - Externe Quelle [End Of Life](https://endoflife.software/applications/databases/mysql)
 - Schwerer lesbar: [Oracle selbst](https://www.mysql.com/support/eol-notice.html)
 
+## Stabilität
 
-- Versionen: DMR (Developer Milestone Release), RC (Release Candidate), GA (offiziell)
+- DRM ("Developer Milestone Release"), eine Art Alpha, Spielzeug zum Testen neuer Features, leicht radioaktiv.
+- RC (Release Candidate), eine Art Beta, "als Replica in Produktion mitlaufen lassen und Probleme melden, sonst sind die hinterher im Release"
+  - GA (General Availability), ein Release
 
-- 8.0 nicht downgradeable (vorher: innerhalb einer Release-Series stabiles Binärformat)
+*Achtung:* 8.0 nicht notwendigerweise innerhalb der Serie downgradeable (vorher: innerhalb einer Release-Series stabiles Binärformat)
 
+## Trickery
 
+Einige Packager starten den Dienst automatisch nach der Installation des Paketes.
 
+Das ist ein unglaublicher Nerv, weil es die Ansibilisierung von Dingen erschwert und die klassische Trifekta kaputt machen ("Paket installieren", "Config instantiieren", "Dienst starten"). Der Dienst startet bevor Config da ist und macht wilde Dinge, ist eventuell auch ungesichert.
 
+Ich kacke da gerne vorher eine defekte `/etc/mysql/my.cnf` ins System, die einen Start des Dienstes ohne weitere Parameter verhindert.
 
-Für Produktion hoffentlich das RPM, oder halt das Deb (schlechte Erfahrungen in der Vergangenheit)
+# Selber Testen
 
-Oft ein problem: Autostart des Dienstes nach installation eines Updates.
-- Trick: Installation einer existierenden /etc/mysql/my.cnf mit einem Syntaxfehler, der einen Start verhindert.
+Auf meinem Mac: Homebrew, Docker
 
-Zum Testen auf dem eigenen Rechner:
-- Homebrew?
-- Docker?
-- dbdeployer: Consultants und Leute, die Szenarien mit bestimmten Versionen nachstellen müssen.
+Auf meinem Testserver: [`dbdeployer`](https://github.com/datacharmer/dbdeployer). Damit kann ich ein MySQL-Museum ohne Container betreiben und auch schnell Replikations-Setups durchtesten.
+
