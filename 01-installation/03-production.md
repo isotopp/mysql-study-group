@@ -132,9 +132,14 @@ MySQL wird gestartet mit `datadir=/mysql/<chain>/data`, Logs gehen nach `/mysql/
 Warum der Chain-Name da drin?
 Der Gedanke war früher, daß wir eventuell mal den Fall haben können wo eine LVM Gruppe eines anderen Servers wie auch immer herein importiert werden kann, und dann will ich `/mysql/{chain1,chain2}/data` haben können.
 
-# Generelle Überlegungen zur HW
+Was würde ich heute anders machen?
+Ich würde die my.cnf auch da hin tun, damit sie auf dem LVM liegt und auch mit gesichert wird. In einer Weise löst MySQL 8 das Problem durch die persistente Config, die ja in [`$datadir/mysqld-auto.cnf`](https://dev.mysql.com/doc/refman/8.0/en/persisted-system-variables.html#persisted-system-variables-file-handling) liegt. 
+
+# Generelle Überlegungen zum Setup
 
 Bei Datenbanken ist der Schlüssel zum Tempo RAM - die Maschine sollte großzügig mit Speicher ausgerüstet werden.
+
+[Memory Saturated MySQL](https://blog.koehntopp.info/2021/03/12/memory-saturated-mysql.html)
 
 "Der Working Set der Maschine sollte in den Speicher passen."
 
@@ -170,3 +175,36 @@ MySQL ohne Replikation gibt es nicht. Replikation erlaubt es Dir, unterbrechungs
 - Replica für unterbrechungsfreies Upgrade
   - "Habe mindestens eine Maschine mehr als Du brauchst" (VMs sind billig, mach Dir mehr davon!)
 - Mit Replikation ist RAID sehr optional (wir fahren alle Datenbanken mit JBOD + LVM2)
+
+## XFS, nicht ext4
+
+Wir verwenden in `/mysql/<chain>` immer XFS.
+
+Ein Projekt bei MySQL AB mit einem sehr großen Kunden hatte enorme Probleme, stabile Performance zu erreichen. 
+Es stellt sich heraus, daß `ext4` doppelt so schnell ist ("eine halb so große Commit-Latenz hat") wie `xfs`.
+Jedoch kommt es alle paar Sekunden zu einem Stall, in dem `ext4` irgendwelche Buffer im Hintergrund raus schreibt und eine Folge von Commits stauen sich. `xfs` zeigt dieses Verhalten nie: Die Commit-Latenz hat fast keinen Jitter.
+
+Wir designen Systeme nicht für den Durchschnitt, sondern für den (schlechtesten) Extremfall. Es ist also wichtig, gleichmäßige Performance zu erreichen, und dann kann man versuchen, diesen gleichmäßigen Performancefall zu verbessern.
+
+Indem wir `xfs` verwenden können wir einigermaßen sicher sein, daß bester und schlechtester Performancefall beim Schreiben auf Disk nahe beieinander liegen.
+
+## LVM2 unten drunter
+
+LVM2 als Lage unter allen Datensystemen gibt uns eine Menge Flexibilität: Wir können Partitionen aus zugesteckten Drives zusammenkleben, erweitert, nachträglich mirrorn und sogar (mit dem extrem schlechten `lvsnapshot`) snapshotten, wenn nicht zu viel Last ist.
+
+Wir machen alle Setups mit so viel LVM2 als möglich.
+
+## ZFS, btrfs?
+
+ZFS und btrfs sind möglich und eventuell sogar vorteilhaft, wenn die Hardware es her gibt (ohne Flash braucht man nicht anzutreten) und wenn man den Konfigurationstanz machen kann und will.
+
+## Blockgrößen und Alignment
+
+Durch das ganze Layering beim Storage kann es vorkommen, daß
+
+- Partitionsanfänge
+- Blöcke und
+- Readaheads
+
+nicht aligned oder gleich sind. Das muß man ggf prüfen und mal validieren, sonst hat man Read Amplification und das wäre schlimm.
+
