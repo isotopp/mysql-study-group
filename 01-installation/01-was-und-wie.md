@@ -35,6 +35,35 @@ Unsere "Standardblade" ist eine Dual Silver-4110 (16C/32T) mit 128 GB RAM und ei
 
 Vergleiche das mit AWS RDS db.m5.4xl (1/2 solche Blade), plus EBS, Netz und S3, und mit m5.4xl + EBS + Netz + S3.
 
+### Windows
+
+Wo?
+- C:\Program Files\MySQL\MySQL Server 8.0\{bin,docs,include,lib,share}
+- %PROGRAMDATA%\MySQL\MySQL Server 8.0\ (C:\ProgramData) - unbedingt umstellen
+
+Config?
+- Hier my.ini, nicht my.cnf
+- Lage irgendwo in SYSTEM32 oder andere wilde Orte -> unbedingt mit Option bei der Servicedefinition angeben.
+
+Betrieb?
+- Alle möglichen Restriktionen (Ports limitiert, DROP DATABASE vs. File Locks, ^Z in Files und Pipelines, \ Zeichen und so weiter)
+
+Service?
+- Register als Service 
+- mysqld.exe Servicename --install --defaults-file=...my.ini, dann sc start/stop service (vormals net start/stop)
+- Löschen mit sc delete name oder mysqld --remove name
+
+Doku?
+- https://dev.mysql.com/doc/refman/8.0/en/windows-start-service.html
+
+"Don't."
+
+Server?
+- Lange Liste von Windows Server Versionen oben
+- Einsatz bei einem Kunden in Karlsruhe: Kein Server-Windows auf Kassensystemen verwendet, weil kein Speicher vorhanden (teuer, Kosten mal Anzahl der Kassen). MySQL 2x langsamer als IBM DB/2 und MS SQL-Server. Auf Windows Server sind alle gleich langsam. Wieso?
+- Nach langem Tracing: Auf Nicht-Server Windows sind manche Varianten des Windows-Äquivalentes von fsync()/fdatasync() als NO-OP implementiert. Das passiert im Kerneltreiber, der den Platten Filtertreiber aufruft. MySQL verwendet eine andere, ältere Weise des Plattensyncs, die immer funktioniert ("Kasse kann jederzeit hart ausgeschaltet werden"), aber die Performanceziele nicht erfüllt.
+- Die Kassen wurden massiv mit Hardware aufgerüstet, das hat das Projekt sehr verteuert.
+
 ### Also
 
 - Zum Spielen auf Mac: Homebrew
