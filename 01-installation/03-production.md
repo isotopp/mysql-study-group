@@ -132,3 +132,41 @@ MySQL wird gestartet mit `datadir=/mysql/<chain>/data`, Logs gehen nach `/mysql/
 Warum der Chain-Name da drin?
 Der Gedanke war früher, daß wir eventuell mal den Fall haben können wo eine LVM Gruppe eines anderen Servers wie auch immer herein importiert werden kann, und dann will ich `/mysql/{chain1,chain2}/data` haben können.
 
+# Generelle Überlegungen zur HW
+
+Bei Datenbanken ist der Schlüssel zum Tempo RAM - die Maschine sollte großzügig mit Speicher ausgerüstet werden.
+
+"Der Working Set der Maschine sollte in den Speicher passen."
+
+"Der größte Index der größten Tabelle sollte in den Speicher passen." (macht den Data Load schneller)
+
+CPU ist minder wichtig:
+- Index/Full Data Scan - Index fehlt oder ist nicht effektiv.
+- Sorting - eventuell im Client machen?
+- Stored Routines oder Stored Functions - wegschmeißen, neu machen. Das Setup ist rettungslos kaputt.
+
+Storage:
+- "5x mehr als die Datenbank"
+  - Binlogs, Dump Space usw.
+  - Bei großen Installationen oder bei Replikation: 3x mehr.
+  - Warum so viel? Wachstum, Marge: MySQL ist extrem vergnatzt, wenn es jemals eine volle Platte sieht. Kann auch schwer zu fixen sein.
+    
+- "0.4ms Commit Latency" -> 2500 Commit/s sequentiell
+
+```php
+# 2500 Loops pro Sekunde
+foreach ($alldata as $id => $data) {
+  $db->insert($id, $data);
+  $db->commit();
+}    
+```  
+
+## Ohne Replikation ist es defekt
+
+MySQL ohne Replikation gibt es nicht. Replikation erlaubt es Dir, unterbrechungsfrei Operations durchzuführen.
+
+- Replica für Backup
+- Replica zum Versionen testen
+- Replica für unterbrechungsfreies Upgrade
+  - "Habe mindestens eine Maschine mehr als Du brauchst" (VMs sind billig, mach Dir mehr davon!)
+- Mit Replikation ist RAID sehr optional (wir fahren alle Datenbanken mit JBOD + LVM2)
