@@ -133,7 +133,8 @@ Warum der Chain-Name da drin?
 Der Gedanke war früher, daß wir eventuell mal den Fall haben können wo eine LVM Gruppe eines anderen Servers wie auch immer herein importiert werden kann, und dann will ich `/mysql/{chain1,chain2}/data` haben können.
 
 Was würde ich heute anders machen?
-Ich würde die my.cnf auch da hin tun, damit sie auf dem LVM liegt und auch mit gesichert wird. In einer Weise löst MySQL 8 das Problem durch die persistente Config, die ja in [`$datadir/mysqld-auto.cnf`](https://dev.mysql.com/doc/refman/8.0/en/persisted-system-variables.html#persisted-system-variables-file-handling) liegt. 
+Ich würde die my.cnf auch da hin tun, damit sie auf dem LVM liegt und auch mit gesichert wird.
+In einer Weise löst MySQL 8 das Problem durch die persistente Config, die ja in [`$datadir/mysqld-auto.cnf`](https://dev.mysql.com/doc/refman/8.0/en/persisted-system-variables.html#persisted-system-variables-file-handling) liegt. 
 
 # Generelle Überlegungen zum Setup
 
@@ -145,7 +146,8 @@ Bei Datenbanken ist der Schlüssel zum Tempo RAM - die Maschine sollte großzüg
 
 "Der größte Index der größten Tabelle sollte in den Speicher passen." (macht den Data Load schneller)
 
-CPU ist minder wichtig:
+CPU ist minder wichtig. 
+Was sind Möglichkeiten für eine Datenbank, viel CPU zu verwenden?
 - Index/Full Data Scan - Index fehlt oder ist nicht effektiv.
 - Sorting - eventuell im Client machen?
 - Stored Routines oder Stored Functions - wegschmeißen, neu machen. Das Setup ist rettungslos kaputt.
@@ -154,7 +156,8 @@ Storage:
 - "5x mehr als die Datenbank"
   - Binlogs, Dump Space usw.
   - Bei großen Installationen oder bei Replikation: 3x mehr.
-  - Warum so viel? Wachstum, Marge: MySQL ist extrem vergnatzt, wenn es jemals eine volle Platte sieht. Kann auch schwer zu fixen sein.
+  - Warum so viel?
+    Wachstum, Marge: MySQL ist extrem vergnatzt, wenn es jemals eine volle Platte sieht. Kann auch schwer zu fixen sein.
     
 - "0.4ms Commit Latency" -> 2500 Commit/s sequentiell
 
@@ -168,7 +171,8 @@ foreach ($alldata as $id => $data) {
 
 ## Ohne Replikation ist es defekt
 
-MySQL ohne Replikation gibt es nicht. Replikation erlaubt es Dir, unterbrechungsfrei Operations durchzuführen.
+MySQL ohne Replikation gibt es nicht.
+Replikation erlaubt es Dir, unterbrechungsfrei Operations durchzuführen.
 
 - Replica für Backup
 - Replica zum Versionen testen
@@ -182,15 +186,18 @@ Wir verwenden in `/mysql/<chain>` immer XFS.
 
 Ein Projekt bei MySQL AB mit einem sehr großen Kunden hatte enorme Probleme, stabile Performance zu erreichen. 
 Es stellt sich heraus, daß `ext4` doppelt so schnell ist ("eine halb so große Commit-Latenz hat") wie `xfs`.
-Jedoch kommt es alle paar Sekunden zu einem Stall, in dem `ext4` irgendwelche Buffer im Hintergrund raus schreibt und eine Folge von Commits stauen sich. `xfs` zeigt dieses Verhalten nie: Die Commit-Latenz hat fast keinen Jitter.
+Jedoch kommt es alle paar Sekunden zu einem Stall, in dem `ext4` irgendwelche Buffer im Hintergrund raus schreibt und eine Folge von Commits stauen sich. 
+`xfs` zeigt dieses Verhalten nie: Die Commit-Latenz hat fast keinen Jitter.
 
-Wir designen Systeme nicht für den Durchschnitt, sondern für den (schlechtesten) Extremfall. Es ist also wichtig, gleichmäßige Performance zu erreichen, und dann kann man versuchen, diesen gleichmäßigen Performancefall zu verbessern.
+Wir designen Systeme nicht für den Durchschnitt, sondern für den (schlechtesten) Extremfall.
+Es ist also wichtig, gleichmäßige Performance zu erreichen, und dann kann man versuchen, diesen gleichmäßigen Performancefall zu verbessern.
 
 Indem wir `xfs` verwenden können wir einigermaßen sicher sein, daß bester und schlechtester Performancefall beim Schreiben auf Disk nahe beieinander liegen.
 
 ## LVM2 unten drunter
 
-LVM2 als Lage unter allen Datensystemen gibt uns eine Menge Flexibilität: Wir können Partitionen aus zugesteckten Drives zusammenkleben, erweitert, nachträglich mirrorn und sogar (mit dem extrem schlechten `lvsnapshot`) snapshotten, wenn nicht zu viel Last ist.
+LVM2 als Lage unter allen Datensystemen gibt uns eine Menge Flexibilität: 
+Wir können Partitionen aus zugesteckten Drives zusammenkleben, erweitert, nachträglich mirrorn und sogar (mit dem extrem schlechten `lvsnapshot`) snapshotten, wenn nicht zu viel Last ist.
 
 Wir machen alle Setups mit so viel LVM2 als möglich.
 
@@ -206,5 +213,6 @@ Durch das ganze Layering beim Storage kann es vorkommen, daß
 - Blöcke und
 - Readaheads
 
-nicht aligned oder gleich sind. Das muß man ggf prüfen und mal validieren, sonst hat man Read Amplification und das wäre schlimm.
+nicht aligned oder gleich sind.
+Das muß man ggf prüfen und mal validieren, sonst hat man Read Amplification und das wäre schlimm.
 

@@ -16,14 +16,17 @@ Optionen zur Vereinfachung:
 --defaults-extra-file=
 ```
 
-Ich mag es einfach, daher die my.cnf für den Server nach `/mysql/clustername/etc/my.cnf` mit einer `[mysqld]` Section und gut ist. Dann `--defaults-file=...`
+Ich mag es einfach, daher die my.cnf für den Server nach `/mysql/clustername/etc/my.cnf` mit einer `[mysqld]` Section und gut ist.
+Dann `--defaults-file=...`
 
 Neu in MySQL 8.0:
 - SET PERSISTENT
 - SET PERSISTENT_ONLY
 - $datadir/mysqld-auto.cnf
 
-Warum? Oracle betreibt jetzt selbst MySQL in seiner Cloud, und interessiert sich jetzt viel mehr für Operations. Außerdem "MySQL aaS", also kein Zugang zu den Kisten für Kunden.
+Warum?
+Oracle betreibt jetzt selbst MySQL in seiner Cloud, und interessiert sich jetzt viel mehr für Operations.
+Außerdem "MySQL aaS", also kein Zugang zu den Kisten für Kunden.
 
 # Postinstallation
 
@@ -61,9 +64,9 @@ https://dev.mysql.com/doc/refman/8.0/en/upgrade-paths.html
 - Am Besten erst in 5.7 nach .lastest, dann nach 8.0
 - GA beginnt mit 8.0.11
 
-Upgrade früher mit `mysql_upgrade` external Script, jetzt (.16) Teil des Binary
-Die Systemtabellen in `mysql.*`, und die Views in `sys.*` sowie `I_S` und `P_S` werden massiert.
-Bei Millionen von Tabellen kann das schon mal weh tun (Out of Filehandle Bug)
+Upgrade früher mit `mysql_upgrade` external Script, jetzt (.16) Teil des Binary.
+Die Systemtabellen in `mysql.*`, und die Views in `sys.*` sowie `I_S` und `P_S` werden aktualisiert.
+Bei Millionen von Tabellen kann das schon mal weh tun (Out of Filehandle Bug).
 
 - "--upgrade=NONE", vor .16: --no-dd-upgrade
 - --upgrade=NONE,MINIMAL,AUTO,FORCE
