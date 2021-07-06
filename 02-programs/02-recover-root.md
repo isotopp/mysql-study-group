@@ -53,3 +53,30 @@ Bei `dbdeployer` also in `data/msandbox.err`.
 ```
 
 Hier wollte ich `/tmp/recovery.sql` verwenden, habe aber `/tmp/recovery.sql` konfiguriert.
+
+## skip-grant-tables
+
+In vielen alten Anweisungen findet man den Hinweis, den Server stattdessen mit der Option `skip-grant-tables` zu starten.
+Das ist nicht empfehlenswert, denn der Server läuft ja und lauscht auch auf dem Netzwerk-Port, während er ohne Authentisierung läuft. Keine gute Idee.
+
+### ALTER USER geht nicht?
+
+Ab 8.0.16 ist es so, daß `ALTER USER` nicht geht, wenn `skip-grant-tables` aktiv ist.
+Das ist so, weil der Server dann gar keine Grant Tables hat, die `ALTER USER` bearbeiten könnte.
+Erst nach `FLUSH PRIVILEGES` geht es.
+
+Man kann also den Server mit `skip-grant-tables` starten, sich ohne Paßwort verbinden.
+Danach kann man mit `FLUSH PRIVILEGES` die Grant Tables laden und dann erst mit `ALTER USER "root"@"localhost" IDENTIFIED BY ...` ein Kennwort neu festlegen.
+
+## Keine PASSWORD() Funktion?
+
+Alte Versionen von MySQL haben eine Funktion `PASSWORD()` gehabt, die ein Klartextkennwort in einer für MySQL Tabellen geeigneten Weise verschlüsselt.
+Was die Funktion `PASSWORD()` gemacht hat, war je nach Version unterschiedlich, weil sich die Art und Weise wie MySQL Paßworte speichert über die Zeit geändert hat.
+
+Man hat dann `SET PASSWORD=PASSWORD("geheim");` gemacht, um das Paßwort zu setzen.
+Diese Funktion wird nun vom `ALTER USER`-Statement übernommen.
+
+Mit 8.0.16 hat sich die Paßwortspeicherung erneut geändert, und die Funktion hätte angepaßt werden müssen.
+Da es nun aber `ALTER USER ... IDENTIFIED BY ...` gibt, wird das nicht mehr gebraucht.
+
+Weil es Leute gegeben haben, die die Funktion verwendet haben, um Paßworte für ihre Anwendung (nicht dem MySQL Server) zu verschlüsseln und weil diese Leute bei jeder Anpassung protestiert habenm, daß das ihre Anwendung zerbricht, wurde die Funktion also entfernt.
