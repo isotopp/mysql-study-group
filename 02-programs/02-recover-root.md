@@ -41,6 +41,18 @@ mysql [localhost:8025] {root} (mysql) > quit
 Bye
 ```
 
+Man braucht dabei gar keine Start-/Stop-Scripte, sondern kann auch einfach auf der Kommandozeile den Server freihändig starten:
+
+```bash
+$ mysqld --defaults-file=./my.sandbox.cnf
+```
+
+Oder gar die Init-File Option auch freifliegend mit angeben und sie nicht in die `my.cnf` editieren.
+
+```bash
+$ mysqld --defaults-file=./my.unchanged.sandbox.cnf --init-file=data/startup.sql
+```
+
 Danach muss man natürlich die `startup.sql` löschen, denn sie enthält das Serverpasswort im Klartext.
 Außerdem muß man die `my.cnf` zurück editieren, denn sonst startet der Server nicht, weil er die `startup.sql` nicht mehr findet.
 
