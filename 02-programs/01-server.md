@@ -63,8 +63,7 @@ Stattdessen dies:
 
 ```bash
 kris@server:/tmp$ cd ~/opt/mysql/5.0.96/
-kris@server:~/opt/mysql/5.0.96$ mkdir /tmp/keks; ~/opt/mysql/5.0.96/scripts/mysql_install_db --user=kris --datadir=/tmp/keks
-mkdir: cannot create directory ‘/tmp/keks’: File exists
+kris@server:~/opt/mysql/5.0.96$ mkdir -p /tmp/keks; ~/opt/mysql/5.0.96/scripts/mysql_install_db --user=kris --datadir=/tmp/keks
 Installing MySQL system tables...
 OK
 Filling help tables...
