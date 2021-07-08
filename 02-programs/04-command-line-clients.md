@@ -126,6 +126,16 @@ Schau nach, was er genau bedeutet:
 Wenn man mit `sed` oder anderen Tools dabei will, ist `--skip-extended-insert` eventuell hilfreich.
 Es bewirkt, daß die von `--opt` automatisch aktivierte Option `--extended-insert` abgeschaltet wird.
 
+- [`mysqlpump`] ist ein paralleler Dumper, habe ich noch nicht getestet.
+- Kann dann auch mit `mysqlsh` parallel wieder eingelesen werden.
+
+Wieso noch nicht getestet? Siehe oben, logische Backups skalieren nur so mittel.
+
+Normal ist so bei 10GB-ish Schluß, außer man spendiert genug Maschine.
+Wir hatten eine Konversion von MariaDB nach MySQL 5.7 von einer Datenbank mit einer 35 TB großen Tabelle.
+Auf einer Kiste mit 128 GB Speicher wurde das nie fertig, wir haben dann eine EYPC Naples mit 1 TB RAM spendiert.
+Dann ging es besser.
+
 ## mysqlimport
 
 Äh, nein.
@@ -218,3 +228,25 @@ prompt=\U [\d]>\_
 - [scheme://][user[:[password]]@]host[:port][/schema][?attribute1=value1&attribute2=value2...
 
 - mysqlsh hat eine Python API, dort shell.parseUri() and shell.unparseUri()
+
+# Dinge, die man sich schenken sollte
+
+- mysqlshow
+- mysqld_multi
+- mysqladmin
+- mysqlcheck
+- myisampack, myisamchk, myisam_ftdump, myisamlog und alles was mit MyISAM zu tun hat
+
+## Dinge, die man mal ausprobieren kann
+
+- mysqlslap
+- perror
+- mysql_config
+- my_print_defaults
+
+## Tabellen zum Ansehen
+
+- [Environment Variables](https://dev.mysql.com/doc/refman/8.0/en/environment-variables.html)
+- [Unix Signal Handling](https://dev.mysql.com/doc/refman/8.0/en/unix-signal-response.html)
+
+Der Server versteht SIGTERM (Shutdown), SIGHUP (FLUSH TABLES, FLUSH PRIVILEGES und FLUSH auch sonst alles). Neuerdings auch SIGUSR1 (diverse Logs rotieren), 
