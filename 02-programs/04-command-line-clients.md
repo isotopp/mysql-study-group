@@ -126,6 +126,14 @@ Schau nach, was er genau bedeutet:
 Wenn man mit `sed` oder anderen Tools dabei will, ist `--skip-extended-insert` eventuell hilfreich.
 Es bewirkt, daß die von `--opt` automatisch aktivierte Option `--extended-insert` abgeschaltet wird.
 
+## mysqlimport
+
+Äh, nein.
+
+- [Load CSV with Python](https://blog.koehntopp.info/2020/09/28/mysql-import-csv-not-using-load-data.html), 
+- [Dump CSV with Python](https://blog.koehntopp.info/2020/06/20/export-the-entire-database-to-csv.html),
+- [Code](https://github.com/isotopp/mysql-dev-examples/tree/master/mysql-csv)
+
 ## mysqlbinlog
 
 Das Kommando `mysqlbinlog` wandelt das Binlog in lesbares SQL um.
