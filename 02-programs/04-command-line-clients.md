@@ -88,54 +88,125 @@ Auch viele GUI-Clients machen nach jedem Kommando die Verbindung zu und für das
 
 ## mysqldump
 
+`mysqldump` wandelt eine existierende Datenbank in SQL Statements um, indem es sich an die Datenbank verbindet, Schema und Daten ausliest und daraus Statements generiert.
+
+Ein Dump ist ein Script, das man dann mit dem `mysql` Kommandozeilenclient einlesen kann (zum Beispiel mit `source blabla.sql).
+Das funktioniert natürlich nur bis zu einer gewissen Datenbank-Größe. 
+Der Dump ist dabei weniger der Problem als das Wiedereinlesen, speziell das Erzeugen der Indices.
+
+Wichtige Optionen:
+
+```bash
+$ mysqldump ... --no-data $datenbank $tabelle
+```
+
+Das macht einen Dump des Schemas für die angegebene Tabelle in der angegebenen Datenbank (alle Tabellen, wenn nur eine Datenbank angegeben ist).
+
+```mysqldump ... --single-transaction --master-data=2 --events --triggers --routines ...```
+
+Das generiert einen Dump mit Daten.
+Wieder kann eine Tabelle oder eine Datenbank ohne Tabelle angegeben werden.
+Die Optionen sorgen dafür, daß auch Events, Trigger und Stored Routines und Functions mit gedumpt werden.
+
+Durch `--single-transaction` wird InnoDB dazu angehalten, den ganzen Dump in einer Read-Only Transaktion mit einem konsistenten View zu machen.
+Die Datenbank läuft also während des Dump weiter, aber der Dump sieht die Transaktionen nicht, die während des Dumps passiert sind, und ist konsistent.
+Die Option `--master-data=2` wird die zum Dump passende Position im Binlog mit vermerkt, aber als Kommentar.
+Das gibt einem die notwendige Information, aber auch Flexibilität beim Wiedereinlesen des Dump.
+
+Der Schalter `--opt` ist automatisch an.
+Schau nach, was er genau bedeutet:
+
+```bash
+  --opt               Same as --add-drop-table, --add-locks, --create-options,
+                      --quick, --extended-insert, --lock-tables, --set-charset,
+                      and --disable-keys. Enabled by default, disable with
+                      --skip-opt.
+```
+
+Wenn man mit `sed` oder anderen Tools dabei will, ist `--skip-extended-insert` eventuell hilfreich.
+Es bewirkt, daß die von `--opt` automatisch aktivierte Option `--extended-insert` abgeschaltet wird.
+
 ## mysqlbinlog
+
+Das Kommando `mysqlbinlog` wandelt das Binlog in lesbares SQL um.
+Wenn das Binlog selbst in Row Format vorliegt, ist das auch sehr leicht parsebares, fest formatiertes SQL, weil der Row Change als SQL-Statement emuliert wird.
+
+Mit der Option `-vvv` kann man einige sonst nur als Base64 vorliegenden Dinge als SQL interpretiert bekommen.
+
+Mit den verschiedenen `--start` und `--stop` Varianten kann man Teile des Binlogs aussägen.
+Das braucht man meistens, wenn Replikation oder Restore hoffnungslos vergurkt sind und man mit ein wenig Replication Surgery Dinge richten muß, etwa das falsche `DROP TABLE` da auslassen oder ähnliches.
 
 ## mysqlsh
 
+Eine Shell mit Python-API, die man zur Automatisierung von MySQL Operations in Zukunft verwenden soll.
+Ein Thema für sich.
+
 ## gemeinsame Optionen
 
+Connection Parameter:
+
+```bash
 --user
 --password
 --host
 --port
+```
 
---host=localhost
---socket
+Wichtig für `libmysqlclient.so` basierende Clients:
 
+```
+--host=localhost vs. --host=127.0.0.1
+--socket vs. --port
+```
+
+Optionen vs. ini-File vs. SET Kommando:
+
+```
 --ich_bin_eine_option -> ich-bin-eine-option= -> SET ich_bin_eine_option
 - ausser, wenn sie das nicht ist
+```
+
+Größen in der Config vs. Größen in MySQL Client:
+
 - --size=17K (M, G, T, P, E) (base-1024) -> SET size=17*1024
 
 ## persisted config variables vs. my.cnf vs. mysqlsh
 
+Neu in MySQL 8: `SET PERSIST @bla = ...` und `SET PERSIST_ONLY @bla = ...`
+Solche "Persisted config variables" werden dann in `$DATADIR/mysqld-auto.cnf` hinterlegt.
+Das gibt es, weil Oracle ja jetzt MySQL-as-a-Service betreibt und man da schlecht eine `.cnf` hinterlegen kann.
 
-"Persisted config variables". $DATADIR/mysqld-auto.cnf
+## .mylogin.cnf
 
-.mylogin.cnf (https://blog.koehntopp.info/2012/10/03/mylogin-cnf-passworte-wiederherstellen.html, https://blog.koehntopp.info/2020/09/23/mylogin-cnf.html )
+[Deutsch](https://blog.koehntopp.info/2012/10/03/mylogin-cnf-passworte-wiederherstellen.html),
+[English](https://blog.koehntopp.info/2020/09/23/mylogin-cnf.html)
 
-Ignore o+w config files
+World Writeable `.*.cnf` wird ignoriert.
 
-ini-files, merged in order
-groups, merged in order
+## Config-Staub (doof)
 
-!include ...
-!includedir ... # files must be *.cnf
+- ini-files, merged in order
+- groups, merged in order
 
+Und Include-Direktiven:
 
+- !include ...
+- !includedir ... # files must be *.cnf
 
-## ~/.my.cnf
+## Meine ~/.my.cnf
 
+```
 [mysql]
 user=kris
 password=geheim
 database=kris
 show-warnings
 prompt=\U [\d]>\_
+```
 
 ## mysqlsh URI like dbstrings
 
-https://dev.mysql.com/doc/refman/8.0/en/connecting-using-uri-or-key-value-pairs.html#connecting-using-uri
-[scheme://][user[:[password]]@]host[:port][/schema][?attribute1=value1&attribute2=value2...
+- https://dev.mysql.com/doc/refman/8.0/en/connecting-using-uri-or-key-value-pairs.html#connecting-using-uri
+- [scheme://][user[:[password]]@]host[:port][/schema][?attribute1=value1&attribute2=value2...
 
-mysqlsh hat eine Python API
-shell.parseUri() and shell.unparseUri()
+- mysqlsh hat eine Python API, dort shell.parseUri() and shell.unparseUri()
