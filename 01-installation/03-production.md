@@ -127,7 +127,7 @@ Dort drin dann
 $ mkdir -p /mysql/<chain>/{data,log,tmp}
 ```
 
-MySQL wird gestartet mit `datadir=/mysql/<chain>/data`, Logs gehen nach `/mysql/<chain>/logs` und der Server läuft mit `tmpdir=/mysql/<chain>/tmp`.
+MySQL wird gestartet mit `datadir=/mysql/<chain>/data`, BinLogs gehen nach `/mysql/<chain>/logs` und der Server läuft mit `tmpdir=/mysql/<chain>/tmp`.
 
 Warum der Chain-Name da drin?
 Der Gedanke war früher, daß wir eventuell mal den Fall haben können wo eine LVM Gruppe eines anderen Servers wie auch immer herein importiert werden kann, und dann will ich `/mysql/{chain1,chain2}/data` haben können.
@@ -168,6 +168,16 @@ foreach ($alldata as $id => $data) {
   $db->commit();
 }    
 ```  
+ - früher:
+    - drehender Rost mit 5ms Latencies
+    - RAID mit wide-stripes oder JBOD mit striping
+    - Raid-Controller mit CPU und Write-Cache und Battery-Buffer
+    
+  - heute:
+    - mit NVME hat man massiven IOPs Überfluß und minimale Latencies
+    - partitionieren/virtualisieren für maximale parallelität
+    - Raid-Controller machen Dinge langsamer! 
+
 
 ## Ohne Replikation ist es defekt
 
