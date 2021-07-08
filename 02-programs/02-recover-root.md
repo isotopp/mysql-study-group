@@ -64,12 +64,13 @@ Bei `dbdeployer` also in `data/msandbox.err`.
 2021-07-06T15:45:08.236300Z 0 [ERROR] [MY-010119] [Server] Aborting
 ```
 
-Hier wollte ich `/tmp/recovery.sql` verwenden, habe aber `/tmp/recovery.sql` konfiguriert.
+Hier wollte ich `data/startup.sql` verwenden, habe aber `/tmp/recovery.sql` konfiguriert.
 
 ## skip-grant-tables
 
 In vielen alten Anweisungen findet man den Hinweis, den Server stattdessen mit der Option `skip-grant-tables` zu starten.
-Das ist nicht empfehlenswert, denn der Server läuft ja und lauscht auch auf dem Netzwerk-Port, während er ohne Authentisierung läuft. Keine gute Idee.
+Das ist nicht empfehlenswert, denn der Server läuft ja und lauscht auch auf dem Netzwerk-Port, während er ohne Authentisierung läuft. 
+Keine gute Idee.
 
 ### ALTER USER geht nicht?
 
