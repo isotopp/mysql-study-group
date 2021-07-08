@@ -94,7 +94,7 @@ Doku?
 
 ## Stabilität
 
-- DRM ("Developer Milestone Release"), eine Art Alpha, Spielzeug zum Testen neuer Features, leicht radioaktiv.
+- DMR ("Developer Milestone Release"), eine Art Alpha, Spielzeug zum Testen neuer Features, leicht radioaktiv.
 - RC (Release Candidate), eine Art Beta, "als Replica in Produktion mitlaufen lassen und Probleme melden, sonst sind die hinterher im Release"
   - GA (General Availability), ein Release
 
