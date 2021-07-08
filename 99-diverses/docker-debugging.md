@@ -2,7 +2,7 @@
 
 ```bash
 # l=$(docker ps --format '{{ .Names  }}' )
-# for i in $l; do echo -n "$i "; docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $i; done
+# for i in $l; do echo -n "$i "; docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $i; done | column -t
 mqttbridge 172.19.0.5
 z2m 172.19.0.4
 grafana 172.19.0.6
@@ -16,3 +16,4 @@ jitsi-web 172.3.0.4
 gitlab 172.18.0.3
 gitlab-runner 172.18.0.2
 ```
+Hint: use ```sort -V -k 2 | column -t ``` to sort by IP-Address
