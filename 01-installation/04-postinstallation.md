@@ -33,6 +33,7 @@ Außerdem "MySQL aaS", also kein Zugang zu den Kisten für Kunden.
 "Dein RPM macht das schon"
 
 - Root Account gesichert?
+    - Beim Erst-Start aus RPM heraus wird ein Zufallspasswort für root generiert und ins Systemlog geschrieben !!!
 - Permissions im Datadir okay?
 - Keine weiteren Accounts da (früher ""@localhost)
 - Restartable? Service?
