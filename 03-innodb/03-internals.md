@@ -85,7 +85,7 @@ Durch Verwenden von Primary Keys als Record Pointers in Sekundärschlüsseln iso
 
 Weil der Primärschlüssel die physische Anordnung von Records in der Tabelle bestimmt und weil er in jedem Sekundärschlüssel verwendet wird, muss der PK mit Bedacht gewählt werden.
 
-- Er muß vorhanden sein. InnoDB macht schlimme Dinge, wenn er nicht definiert wird (was technisch gesehen legal ist).
+- Er muss vorhanden sein. InnoDB macht schlimme Dinge, wenn er nicht definiert wird (was technisch gesehen legal ist).
 - Er sollte kurz sein (<32 Bytes, ideal 8 Bytes)
 - Sinnvolle Reihenfolge
 
