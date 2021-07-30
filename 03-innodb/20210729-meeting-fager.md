@@ -14,7 +14,7 @@
 -- InnoDB versucht sich dann die beste Spalte für einen Primary-Key zu identifizieren und nimmt im zweifelsfall die DB_ROW_ID.
 -- Daher immer selbst einen anständigen PK definieren.
 -- Mit Indices nicht geizen
--- Es gibt ein Konfig-Flag, welches PKs auf Tabellen erzwingt. Ohne lassen sich die Tabellen dann nicht anlegen.
+-- Es gibt ein Konfig-Flag, welches PKs auf Tabellen erzwingt. Ohne lassen sich die Tabellen dann nicht anlegen. ([sql+require_primary_key](https://dev.mysql.com/doc/refman/8.0/en/server-system-variables.html#sysvar_sql_require_primary_key))
 
 ## Transaktionen
 - SHOW ENGINE INNODB STATUS;
