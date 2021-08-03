@@ -35,7 +35,7 @@ Es gibt drei Wege, eine explizite Transaktion zu beginnen: `BEGIN`, `BEGIN WORK`
 Alle drei funktionieren und bewirken dasselbe, aber nur die dritte Methode kennzeichnet die Transaktion auch ausdrücklich als `READ WRITE`.
 Das ist wichtig, wenn man einen Proxy wie [`proxysql`](https://github.com/sysown/proxysql) in der Mitte hat und man diesen verwenden möchte, um `START TRANSACTION READ ONLY` zu einer Replica zu senden.
 
-Leider sind Programme, zu dumm, um von sich aus Reads von Writes zu trennen.
+Leider sind viele Programme zu dumm, um von sich aus Reads von Writes zu trennen.
 Solche Programme sind in der Regel auch zu dumm, um Transaktionen zu verwenden.
 Oder, wenn sie es tun, Transaktionen korrekt zu verwenden.
 In jedem Fall wird man da dann auch mit `proxysql` nicht viel retten können.
