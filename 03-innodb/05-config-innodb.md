@@ -255,3 +255,96 @@ Für Linux und XFS auf `O_DIRECT` setzen.
 Seit 8.0.14 kann man auch `O_DIRECT_NO_FSYNC` nehmen.
 
 Wir nehmen `O_DIRECT`.
+
+## Tables
+
+- File Per Table (immer an).
+- Zentraler Tablespace, File schrumpft nie.
+  - früher Undo Log, früher DoubleWrite Buffer, immer Metadata.
+  - früher optional Tabellen, doll nicht empfohlen
+- InnoDB Tabellen nicht kopierbar auf OS-Ebene
+  - EXPORT, IMPORT
+  - früher frm-Dateien und Metadata Store, divergent. Heute nur noch Metadata.
+- Row Formats
+- Primary Key
+  - Clustered Index
+- DATA DIRECTORY Clause
+  - Don't.
+- TABLESPACE Clause
+  - Neu. Large untested.
+- ALTER TABLE ... IMPORT TABLESPACE ...
+  - same Version, same row format, foreign keys not checked und überhaupt. 
+  - Kein FULLTEXT (Workaround existiert)
+  - gut für partial restore, eventuell. Kein Transportmechanismus.
+  - FLUSH TABLES ... FOR EXPORT
+  - Metadaten exportiert aus system tablespace nach .cfg, dazu die .ibd.
+- `innodb_autoinc_lock_mode (Default: 2). Kann Löcher erzeugen, unsafe mit SBR.
+  - Wir setzen das auf 1, wo noch SBR im Einsatz ist (fast nirgends).
+
+## Indexes
+
+- Noch mal Clustered index
+- PK ist echt Mandat. Tabellen ohne PK sind technisch gesehen standardkonform, aber sehr aua.
+- SK verwendet den PK als Row Pointer. INDEX(a) ist also immer INDEX(a,id)
+  - BIGINT UNSIGNED NOT NULL, nicht mehr als ca. 32 Bytes
+  - `SERIAL`
+- [sorted index build](https://dev.mysql.com/doc/refman/8.0/en/sorted-index-builds.html)
+  - Checkpoint forced.
+  - Optimizer Statistics Update needed (ANALYZE TABLE, ANALYZE TABLE ... UPDATE HISTGRAM ON, `information_schema_stats_expiry` (seconds, Default: 86400)
+- Neu: `innodb_fill_factor`
+
+## Tablespaces
+
+- system (change buffer)
+  - früher auch DD, DoubleWrite Buffer, Undo Log
+  - `innodb_data_file_path=ibdata:10M:autoextend`, `innodb_autoextend_increment=8M` (Semicolon, nur ein Autoextend)
+  - "raw disk partitions" (don't!)
+
+- `innodb_file_per_table = 1`
+  - Increment ist immer 4MB (außer für kleine Tabellen)
+
+- CREATE TABLESPACE ts ("General Tablespaces")
+  - CREATE TABLE t () TABLESPACE = ts
+  - support limited, viele Einschränkungen
+
+- Undo Log jetzt ein oder mehr Tablespaces
+  - früher Teil vom System Tablespace
+  - besseres Platzmanagement
+
+- Temporary Tablespaces
+  - Neu, früher HEAP/MEMORY TABLES, dann MyISAM Spillover, viele Nachteile (MEMORY = keine VAR* Typen)
+  - Ab 8.0.16 InnoDB Tmptables (vorher: `internal_tmp_disk_storage_engine`)
+  - `innodb_temp_tablespaces_dir` (datadir/#innodb_temp)
+    - 10 oder mehr temp_##.ibt
+    - I_S.INNODB_SESSION_TEMP_TABLESPACES und I_S.INNODB_TEMP_TABLE_INFO (implicit, explicit); I_S.FILES
+  - Neu ab 8.0.22: `innodb_extend_and_initialize = 0` -> dann posix_fallocate(). Nur Linux.
+
+## Doublewrite Buffer
+
+- `innodb_doublewrite` - Schalter (Default: On). Off nur bei Dateisystemen, die nicht in-place Updates machen (ZFS, btrfs, bestimmte Fusion-IO)
+- `innodb_doublewrite_dir` - Verlegen des Doublewrite, etwa auf ein NVME oder Fusion-IO.
+- `innodb_doublewrite_files` - (Default: 2) Anzahl der #ib_..._x.dblwr Files (Max: 2x Anzahl der Buffer Pool Instances).
+- `innodb_doublewrite_pages` - (Default: innodb_write_io_threads)
+- `innodb_doublewrite_batch_size` - Anzahl der Pages pro Batch
+
+Wir tunen diese Werte nicht.
+
+## Redo Log
+
+- `innodb_log_files_in_group` - (Default: 2)
+- `innodb_log_file_size`
+
+Redo Log Size ist das Produkt aus beiden Werten. Wir passen immer nur die `innodb_log_file_size` an.
+Zielgröße ist ca. 1/8-1/6 des gesamten Buffer Pools für unsere Workload.
+
+- Group Commit erklären.
+- Redo Log Archiving weniger sinnvoll als Binlogs.
+
+- 8.0.21: ALTER INSTANCE DISABLE INNODB REDO_LOG
+  - Initial Data Load
+  - Nebeneffekt von CLONE
+
+## Undo Log
+
+Jetzt ausgegliedert in den Undo Log Tablespace, vormals Teil vom General Tablespace.
+
