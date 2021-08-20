@@ -73,3 +73,6 @@ Es ist also nichts einzustellen.
 Bei älteren MySQL Versionen muß man `mysql.server` editieren und dafür sorgen, daß statt `mysqld` die Variante `numactl -i all mysqld` gestartet wird.
 
 Bei MySQL in einer KVM ist es nutzbringend, wenn man dafür sorgt, daß die KVM NUMA-aware gestartet wird. In der KVM ist dann nichts zu tun.
+
+Siehe dazu auch [MySQL Swap Insanity](https://blog.jcole.us/2010/09/28/mysql-swap-insanity-and-the-numa-architecture/).
+

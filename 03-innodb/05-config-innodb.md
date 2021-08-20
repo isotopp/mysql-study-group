@@ -115,7 +115,7 @@ Checkpointing wird von den InnoDB Page Cleaner Threads durchgeführt.
 
 - `innodb_page_cleaners` - Anzahl der Page Cleaner Threads (4), maximal Buffer Pool Instances viele (einer pro Pool).
 - `innodb_max_dirty_pages_pct_lwm` - Cleaner startet, wenn die Anzahl der Dirty Pages den Low Water Mark Level erreicht ("early flushing", 10%).
-- `innodb_max_dirty_pages_pct` - Cleaner checkpointed richtig aggressiv, wennd ie Anzahl der Dirty Pages diesen Level erreicht (90%).
+- `innodb_max_dirty_pages_pct` - Cleaner checkpointed richtig aggressiv, wenn die Anzahl der Dirty Pages diesen Level erreicht (90%).
 - `innodb_flush_neighbors` - 0 (off) für SSD, NVME, 1 (on) flusht zusammenhängende Pages im Extent, 2 (hard on) flusht alle Pages im Extent.
 - `innodb_lru_scan_depth` - wie weit in der LRU der Cleaner voraus gucken soll (quasi die Batch Size pro Sekunde). Es werden scan depth * pool instances viele Pages pro Sekunde erwogen.
 
